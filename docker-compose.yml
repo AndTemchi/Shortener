@@ -1,0 +1,70 @@
+version: '3.6'
+
+services:
+
+  shortener.nginx:
+    build:
+      context: ./docker/nginx
+    container_name: shortener.nginx
+    env_file:
+      - ./docker/.env
+    ports:
+      - "80:80"
+    links:
+      - shortener.php
+    volumes:
+      - ./public:/var/www/shortener/public
+    networks:
+      - shortener_network
+
+  shortener.php:
+    build:
+      context: ./docker/php
+    container_name: shortener.php
+    env_file:
+      - ./docker/.env
+    expose:
+      - 9000
+    volumes:
+      - ./:/var/www/shortener:rw
+    networks:
+      - shortener_network
+
+  shortener.db:
+    image: "postgres:14"
+    container_name: shortener.db
+    environment:
+      POSTGRES_PASSWORD: main
+      POSTGRES_USER: main
+      POSTGRES_DB: main
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/var/db-data:/var/lib/postgresql/data:rw
+    networks:
+      - shortener_network
+
+###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:${POSTGRES_VERSION:-13}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      # You should definitely change the password in production
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
+      POSTGRES_USER: ${POSTGRES_USER:-symfony}
+    volumes:
+      - db-data:/var/lib/postgresql/data:rw
+      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/db/data:/var/lib/postgresql/data:rw
+###< doctrine/doctrine-bundle ###
+
+volumes:
+
+###> doctrine/doctrine-bundle ###
+  db-data:
+###< doctrine/doctrine-bundle ###
+  db-data:
+
+networks:
+  shortener_network:
+    driver: bridge
