@@ -19,6 +19,10 @@ class ContentTypeEventListener
     {
         $request = $event->getRequest();
 
+        if($request->isMethod(Request::METHOD_GET)) {
+            return;
+        }
+
         if (false === $this->isSupport($request)) {
             throw new UnsupportedMediaTypeHttpException();
         }
@@ -47,6 +51,7 @@ class ContentTypeEventListener
      */
     private function isSupport(Request $request): bool
     {
-        return 'json' === $request->getContentType() && $request->getContent();
+        return ('json' === $request->getContentType() && $request->getContent());
     }
+
 }

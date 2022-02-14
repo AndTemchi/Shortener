@@ -1,9 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Dto\Link\LinkCreateDto;
+use App\Service\LinkServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,9 +22,19 @@ class LinkController extends AbstractController
      * @param Request $request
      * @return Response
      */
-    public function create(Request $request): Response
+    public function create(Request $request, LinkServiceInterface $linkService): Response
     {
-        return new Response('hello world' . $request, 200);
+        //todo: validation;
+        $request = $request->request->all();
+
+        $createDto = new LinkCreateDto(
+            $request['url'],
+            $request['keyword'],
+            $request['title']
+        );
+        $id = $linkService->create($createDto);
+
+        return new JsonResponse(['id' => $id->getId()], Response::HTTP_CREATED);
     }
 
     /**
@@ -30,7 +44,6 @@ class LinkController extends AbstractController
      */
     public function update(string $id): Response
     {
-
     }
 
     /**
@@ -40,7 +53,6 @@ class LinkController extends AbstractController
      */
     public function delete(string $id): Response
     {
-
     }
 
     /**
@@ -50,7 +62,6 @@ class LinkController extends AbstractController
      */
     public function show(string $id): Response
     {
-        $response = new Response("hello world $id", 200);
-        return $response;
+        return new Response("hello world $id", 200);
     }
 }
